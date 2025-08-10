@@ -1,0 +1,51 @@
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+from google.colab import drive
+drive.mount('/content/drive')
+f=cv.imread('/content/drive/MyDrive/openCV/a1images/a1images/highlights_and_shadows.jpg')
+
+img_lab = cv.cvtColor(f,cv.COLOR_BGR2LAB)
+L,a,b = cv.split(img_lab)
+
+gamma = 0.78
+
+t = np.array([(i/255.0)**(gamma)*255.0 for i in np.arange(0,256)]).astype('uint8')
+
+gamma_corrected_l_channel = cv.LUT(L,t)
+gamma_image = cv.merge([gamma_corrected_l_channel,a,b])
+corrected_image = cv.cvtColor(gamma_image,cv.COLOR_LAB2BGR)
+
+fig,ax=plt.subplots(1,2,figsize=(12,8))
+ax[0].imshow(cv.cvtColor(f,cv.COLOR_BGR2RGB))
+ax[0].set_title('Original Image')
+ax[1].imshow(cv.cvtColor(corrected_image,cv.COLOR_BGR2RGB))
+ax[1].set_title('Gamma Correction')
+for a in ax:
+  a.axis('off')
+plt.show()
+
+channels = ['L','A','B']
+colors = ['red','green','blue']
+
+plt.figure(figsize=(10,6))
+plt.subplot(1,2,1)
+for i,col in enumerate(colors):
+  hist = cv.calcHist([img_lab],[i],None,[256],[0,256])
+  plt.plot(hist,color=col,label = f'{channels[i]} channel')
+  plt.xlim([0,256])
+plt.title('Original Image - LAB Histogram')
+plt.xlabel('Value')
+plt.ylabel('Frequency')
+plt.legend()
+
+plt.subplot(1,2,2)
+for i,col in enumerate(colors):
+  hist = cv.calcHist([gamma_image],[i],None,[256],[0,256])
+  plt.plot(hist,color=col,label = f'{channels[i]} channel')
+  plt.xlim([0,256])
+plt.title('Original Image - LAB Histogram')
+plt.xlabel('Value')
+plt.ylabel('Frequency')
+plt.legend()
+
